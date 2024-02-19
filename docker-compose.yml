@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 networks:
   monitor-net:
@@ -66,20 +66,20 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
-  dcgm_exporter:
-    image: nvcr.io/nvidia/k8s/dcgm-exporter:${DCGM_EXPORTER_IMAGE_TAG}
+  dcgm-exporter:
+    image: nvidia/dcgm-exporter:latest
+    container_name: dcgm-exporter
     deploy:
       resources:
         reservations:
           devices:
-            - driver: nvidia
-              count: all
-              capabilities: [ gpu ]
+          - driver: nvidia
+            count: all
+            capabilities: [ gpu ]
     environment:
       - DCGM_EXPORTER_NO_HOSTNAME=1
     cap_add:
       - SYS_ADMIN
-    container_name: dcgm-exporter
     restart: unless-stopped
     expose:
       - 9400
@@ -134,7 +134,7 @@ services:
       org.label-schema.group: "monitoring"
 
   caddy:
-    image: stefanprodan/caddy
+    image: caddy/caddy
     container_name: caddy
     ports:
       - "3000:3000"
