@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3.7'
 
 networks:
   monitor-net:
@@ -9,7 +9,6 @@ volumes:
     grafana_data: {}
 
 services:
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -67,13 +66,20 @@ services:
     labels:
       org.label-schema.group: "monitoring"
 
-  dcgm-exporter:
-    image: nvidia/dcgm-exporter:latest
+  dcgm_exporter:
+    image: nvcr.io/nvidia/k8s/dcgm-exporter:${DCGM_EXPORTER_IMAGE_TAG}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    environment:
+      - DCGM_EXPORTER_NO_HOSTNAME=1
+    cap_add:
+      - SYS_ADMIN
     container_name: dcgm-exporter
-    volumes:
-      - /var/lib/nvidia-docker/volumes/nvidia_driver/latest:/usr/bin/nvidia-smi
-    command:
-      - '--nvidia-smi-path=/usr/bin/nvidia-smi'
     restart: unless-stopped
     expose:
       - 9400
@@ -90,7 +96,6 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker:/var/lib/docker:ro
-      #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
     restart: unless-stopped
     expose:
       - 8080
