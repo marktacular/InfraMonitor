@@ -28,6 +28,17 @@
     tls off
 }
 
+:9400 {
+    basicauth / {$ADMIN_USER} {$ADMIN_PASSWORD}
+    proxy / nvidia_gpu:9400 {
+            transparent
+        }
+
+    errors stderr
+    tls off
+}
+
+
 :3000 {
     proxy / grafana:3000 {
             transparent
