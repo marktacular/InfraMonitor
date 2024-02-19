@@ -1,6 +1,6 @@
 global:
-  scrape_interval:     15s
-  evaluation_interval: 15s
+  scrape_interval:     5s
+  evaluation_interval: 5s
 
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
@@ -33,6 +33,13 @@ scrape_configs:
     honor_labels: true
     static_configs:
       - targets: ['pushgateway:9091']
+
+  - job_name: 'nvidia_gpu'
+    # Scrape the DCGM Exporter every 15 seconds.
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9400']
+        # Replace 'localhost' with the IP address of the machine where dcgm-exporter is running if it's not the same as Prometheus.
 
 
 alerting:
