@@ -30,7 +30,7 @@
 
 :9400 {
     basicauth / {$ADMIN_USER} {$ADMIN_PASSWORD}
-    proxy / nvidia_gpu:9400 {
+    proxy / dcgm-exporter:9400 {
             transparent
         }
 
