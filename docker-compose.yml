@@ -7,7 +7,6 @@ networks:
 volumes:
     prometheus: {}
     grafana: {}
-    alertmanager: {}
 
 services:
   prometheus:
@@ -35,7 +34,7 @@ services:
     image: prom/alertmanager:latest
     container_name: alertmanager
     volumes:
-      - alertmanager:/etc/alertmanager
+      - ./alertmanager:/etc/alertmanager
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
@@ -70,8 +69,14 @@ services:
   dcgm-exporter:
     image: nvidia/dcgm-exporter:latest
     container_name: dcgm-exporter
+    runtime: nvidia
     environment:
       - DCGM_EXPORTER_NO_HOSTNAME=1
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - /run/nvidia:/run/nvidia:ro
+      - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi:ro
+      # - ./dcgm-exporter:/etc/dcgm-exporter
     cap_add:
       - SYS_ADMIN
     restart: unless-stopped
@@ -83,20 +88,32 @@ services:
       org.label-schema.group: "monitoring"
 
   cadvisor:
-    image: gcr.io/google-containers/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor
     container_name: cadvisor
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
-      - /var/lib/docker:/var/lib/docker:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
     restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN
     expose:
       - 8080
     networks:
       - monitor-net
+    depends_on:
+      - redis
     labels:
       org.label-schema.group: "monitoring"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    expose:
+      - 6379
 
   grafana:
     image: grafana/grafana:main-ubuntu
@@ -105,8 +122,8 @@ services:
       - grafana:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_USER=$ADMIN_USER
+      - GF_SECURITY_ADMIN_PASSWORD=$ADMIN_PASSWORD
       - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
     expose:
@@ -136,18 +153,11 @@ services:
       - "9093:9093"
       - "9091:9091"
       - "9400:9400"
+      - "6379:6379"
     volumes:
       - ./caddy:/etc/caddy
-    environment:
-      - ADMIN_USER=${ADMIN_USER}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     restart: unless-stopped
     networks:
       - monitor-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 5s
-      timeout: 1s
-      retries: 5
     labels:
       org.label-schema.group: "monitoring"

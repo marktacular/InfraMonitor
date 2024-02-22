@@ -5,7 +5,7 @@ global:
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
   external_labels:
-      monitor: 'docker-host-alpha'
+      monitor: 'Seismic'
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
@@ -34,10 +34,10 @@ scrape_configs:
     static_configs:
       - targets: ['pushgateway:9091']
 
-  - job_name: 'nvidia_gpu'
+  - job_name: 'dcgm-exporter'
     scrape_interval: 5s
     static_configs:
-      - targets: ['nvidia_gpu:9400']
+      - targets: ['dcgm-exporter:9400']
 
 
 alerting:

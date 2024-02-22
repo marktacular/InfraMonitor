@@ -1,50 +1,64 @@
-:9090 {
-    basicauth / {$ADMIN_USER} {$ADMIN_PASSWORD}
-    proxy / prometheus:9090 {
-            transparent
-        }
+{
+    # Global options block
+    # Uncomment the next line to enable automatic HTTPS
+    # auto_https off
+}
 
-    errors stderr
-    tls off
+:9090 {
+    basicauth / {
+        mark JDJhJDEwJC8zT0Z5RVA3aDlEUUIxZkdQUk1lOS5DUmJCZHBacFF5ZU9aY0hsZUN3S3RzLkVtL3dtaE5l
+    }
+    reverse_proxy prometheus:9090
+    log {
+        output stderr
+    }
 }
 
 :9093 {
-    basicauth / {$ADMIN_USER} {$ADMIN_PASSWORD}
-    proxy / alertmanager:9093 {
-            transparent
-        }
-
-    errors stderr
-    tls off
+    basicauth / {
+        mark JDJhJDEwJC8zT0Z5RVA3aDlEUUIxZkdQUk1lOS5DUmJCZHBacFF5ZU9aY0hsZUN3S3RzLkVtL3dtaE5l
+    }
+    reverse_proxy alertmanager:9093
+    log {
+        output stderr
+    }
 }
 
 :9091 {
-    basicauth / {$ADMIN_USER} {$ADMIN_PASSWORD}
-    proxy / pushgateway:9091 {
-            transparent
-        }
-
-    errors stderr
-    tls off
+    basicauth / {
+        mark JDJhJDEwJC8zT0Z5RVA3aDlEUUIxZkdQUk1lOS5DUmJCZHBacFF5ZU9aY0hsZUN3S3RzLkVtL3dtaE5l
+    }
+    reverse_proxy pushgateway:9091
+    log {
+        output stderr
+    }
 }
 
 :9400 {
-    basicauth / {$ADMIN_USER} {$ADMIN_PASSWORD}
-    proxy / dcgm-exporter:9400 {
-            transparent
-        }
-
-    errors stderr
-    tls off
+    basicauth / {
+        mark JDJhJDEwJC8zT0Z5RVA3aDlEUUIxZkdQUk1lOS5DUmJCZHBacFF5ZU9aY0hsZUN3S3RzLkVtL3dtaE5l
+    }
+    reverse_proxy dcgm-exporter:9400
+    log {
+        output stderr
+    }
 }
 
+:6379 {
+    basicauth / {
+        mark JDJhJDEwJC8zT0Z5RVA3aDlEUUIxZkdQUk1lOS5DUmJCZHBacFF5ZU9aY0hsZUN3S3RzLkVtL3dtaE5l
+    }
+    reverse_proxy redis:6379
+    log {
+        output stderr
+    }
+}
 
 :3000 {
-    proxy / grafana:3000 {
-            transparent
-            websocket
-        }
+    # No basic auth for Grafana as it usually manages its own users
+    reverse_proxy grafana:3000
+    log {
+        output stderr
+    }
 
-    errors stderr
-    tls off
 }
